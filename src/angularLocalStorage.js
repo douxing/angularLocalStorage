@@ -146,15 +146,25 @@
 				}
 
 				// If it does exist assign it to the $scope value
-				$parse(key).assign($scope, publicMethods.get(storeName));
+				var setter = $parse(key);
+				setter.assign($scope, publicMethods.get(storeName));
 
 				// Register a listener for changes on the $scope value
 				// to update the localStorage value
-				$scope.$watch(key, function (val) {
+				$scope['nglsScopeWatcher$'+key] = $scope.$watch(key, function (val) {
 					if (angular.isDefined(val)) {
 						publicMethods.set(storeName, val);
 					}
 				}, true);
+
+				$scope['nglsLSWatcher$'+key] = function (event) {
+					if (event.key === storeName) {
+						$scope.$apply(function () {
+							setter.assign($scope, publicMethods.get(storeName));
+						});
+					}
+				};
+				$window.addEventListener('storage', $scope['nglsLSWatcher$'+key]);
 
 				return publicMethods.get(storeName);
 			},
@@ -168,7 +178,14 @@
 			unbind: function($scope,key,storeName) {
 				storeName = storeName || key;
 				$parse(key).assign($scope, null);
-				$scope.$watch(key, function () { });
+				if ($scope['nglsScopeWatcher$'+key] && angular.isFunction($scope['nglsScopeWatcher$'+key])) {
+					$scope['nglsScopeWatcher$'+key]();
+					delete $scope['nglsScopeWatcher$'+key];
+				}
+				if ($scope['nglsLSWatcher$'+key] && angular.isFunction($scope['nglsLSWatcher$'+key])) {
+					$window.removeEventListener('storage', $scope['nglsLSWatcher$'+key]);
+					delete $scope['nglsLSWatcher$'+key]
+				}
 				publicMethods.remove(storeName);
 			},
 			/**
