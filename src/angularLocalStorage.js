@@ -127,7 +127,7 @@
 				var defaultOpts = {
 					defaultValue: '',
 					storeName: '',
-					watch: 'watch' // alternative: collection
+					watch: 'watch' // alternative: collection, deepCollection
 				};
 				// Backwards compatibility with old defaultValue string
 				if (angular.isString(opts)) {
@@ -156,33 +156,35 @@
 					}
 				}
 
+				var colUpdater = function (event) {
+					$scope.$apply(function () {
+						var col = getter($scope);
+						var newCol = publicMethods.get(storeName);
+						newCol.splice(0, 0, 0, col.length);
+						Array.prototype.splice.apply(col, newCol);
+					});
+				};
+
 				// Register a listener for changes on the $scope value
 				// to update the localStorage value
-				if (defaultOpts.watch.toLowerCase() === 'collection') {
-					$scope['nglsScopeWatcher$'+key] = $scope.$watchCollection(key, valUpdater);
-					$scope['nglsLSWatcher$'+key] = function (event) {
-						if (event.key === storeName) {
-							$scope.$apply(function () {
-								var col = getter($scope);
-								var newCol = publicMethods.get(storeName);
-								newCol.splice(0, 0, 0, col.length);
-								Array.prototype.splice.apply(col, newCol);
-							});
-						}
-					};
-				} else {
-					$scope['nglsScopeWatcher$'+key] = $scope.$watch(key, valUpdater, true);
-					$scope['nglsLSWatcher$'+key] = function (event) {
-						if (event.key === storeName) {
+				if (event.key === storeName) {
+					if (defaultOpts.watch.toLowerCase() === 'collection') {
+						$scope['nglsScopeWatcher$'+key] = $scope.$watchCollection(key, valUpdater);
+						$scope['nglsLSWatcher$'+key] = colUpdater;
+					} else if (defaultOpts.watch.toLowerCase() === 'deepcollection') {
+						$scope['nglsScopeWatcher$'+key] = $scope.$watch(key, valUpdater, true);
+						$scope['nglsLSWatcher$'+key] = colUpdater;
+					} else {
+						$scope['nglsScopeWatcher$'+key] = $scope.$watch(key, valUpdater, true);
+						$scope['nglsLSWatcher$'+key] = function (event) {
 							$scope.$apply(function () {
 								getter.assign($scope, publicMethods.get(storeName));
 							});
-						}
-					};
+						};
+					}
 				}
 
 				$window.addEventListener('storage', $scope['nglsLSWatcher$'+key]);
-
 				return publicMethods.get(storeName);
 			},
 			/**
