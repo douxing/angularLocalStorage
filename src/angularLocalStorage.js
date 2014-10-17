@@ -126,7 +126,8 @@
 			bind: function ($scope, key, opts) {
 				var defaultOpts = {
 					defaultValue: '',
-					storeName: ''
+					storeName: '',
+					watch: 'collection'
 				};
 				// Backwards compatibility with old defaultValue string
 				if (angular.isString(opts)) {
@@ -149,13 +150,19 @@
 				var setter = $parse(key);
 				setter.assign($scope, publicMethods.get(storeName));
 
-				// Register a listener for changes on the $scope value
-				// to update the localStorage value
-				$scope['nglsScopeWatcher$'+key] = $scope.$watch(key, function (val) {
+				var valUpdater = function (val) {
 					if (angular.isDefined(val)) {
 						publicMethods.set(storeName, val);
 					}
-				}, true);
+				}
+
+				// Register a listener for changes on the $scope value
+				// to update the localStorage value
+				if (defaultOpts.watch.toLowerCase() === 'collection') {
+					$scope['nglsScopeWatcher$'+key] = $scope.watchCollection(key, valUpdater);
+				} else {
+					$scope['nglsScopeWatcher$'+key] = $scope.$watch(key, valUpdater, true);
+				}
 
 				$scope['nglsLSWatcher$'+key] = function (event) {
 					if (event.key === storeName) {
