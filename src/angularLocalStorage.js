@@ -127,7 +127,7 @@
 				var defaultOpts = {
 					defaultValue: '',
 					storeName: '',
-					watch: 'collection'
+					watch: 'watch' // alternative: collection
 				};
 				// Backwards compatibility with old defaultValue string
 				if (angular.isString(opts)) {
