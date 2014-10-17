@@ -157,31 +157,31 @@
 				}
 
 				var colUpdater = function (event) {
-					$scope.$apply(function () {
-						var col = getter($scope);
-						var newCol = publicMethods.get(storeName);
-						newCol.splice(0, 0, 0, col.length);
-						Array.prototype.splice.apply(col, newCol);
-					});
+					if (event.key === storeName) {
+						$scope.$apply(function () {
+							var col = getter($scope);
+							var newCol = publicMethods.get(storeName);
+							newCol.splice(0, 0, 0, col.length);
+							Array.prototype.splice.apply(col, newCol);
+						});
+					}
 				};
 
 				// Register a listener for changes on the $scope value
 				// to update the localStorage value
-				if (event.key === storeName) {
-					if (defaultOpts.watch.toLowerCase() === 'collection') {
-						$scope['nglsScopeWatcher$'+key] = $scope.$watchCollection(key, valUpdater);
-						$scope['nglsLSWatcher$'+key] = colUpdater;
-					} else if (defaultOpts.watch.toLowerCase() === 'deepcollection') {
-						$scope['nglsScopeWatcher$'+key] = $scope.$watch(key, valUpdater, true);
-						$scope['nglsLSWatcher$'+key] = colUpdater;
-					} else {
-						$scope['nglsScopeWatcher$'+key] = $scope.$watch(key, valUpdater, true);
-						$scope['nglsLSWatcher$'+key] = function (event) {
-							$scope.$apply(function () {
-								getter.assign($scope, publicMethods.get(storeName));
-							});
-						};
-					}
+				if (defaultOpts.watch.toLowerCase() === 'collection') {
+					$scope['nglsScopeWatcher$'+key] = $scope.$watchCollection(key, valUpdater);
+					$scope['nglsLSWatcher$'+key] = colUpdater;
+				} else if (defaultOpts.watch.toLowerCase() === 'deepcollection') {
+					$scope['nglsScopeWatcher$'+key] = $scope.$watch(key, valUpdater, true);
+					$scope['nglsLSWatcher$'+key] = colUpdater;
+				} else {
+					$scope['nglsScopeWatcher$'+key] = $scope.$watch(key, valUpdater, true);
+					$scope['nglsLSWatcher$'+key] = function (event) {
+						$scope.$apply(function () {
+							getter.assign($scope, publicMethods.get(storeName));
+						});
+					};
 				}
 
 				$window.addEventListener('storage', $scope['nglsLSWatcher$'+key]);
