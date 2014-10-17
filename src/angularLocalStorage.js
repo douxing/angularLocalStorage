@@ -159,7 +159,7 @@
 				// Register a listener for changes on the $scope value
 				// to update the localStorage value
 				if (defaultOpts.watch.toLowerCase() === 'collection') {
-					$scope['nglsScopeWatcher$'+key] = $scope.watchCollection(key, valUpdater);
+					$scope['nglsScopeWatcher$'+key] = $scope.$watchCollection(key, valUpdater);
 				} else {
 					$scope['nglsScopeWatcher$'+key] = $scope.$watch(key, valUpdater, true);
 				}
