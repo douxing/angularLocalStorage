@@ -147,8 +147,8 @@
 				}
 
 				// If it does exist assign it to the $scope value
-				var setter = $parse(key);
-				setter.assign($scope, publicMethods.get(storeName));
+				var getter = $parse(key);
+				getter.assign($scope, publicMethods.get(storeName));
 
 				var valUpdater = function (val) {
 					if (angular.isDefined(val)) {
@@ -160,17 +160,28 @@
 				// to update the localStorage value
 				if (defaultOpts.watch.toLowerCase() === 'collection') {
 					$scope['nglsScopeWatcher$'+key] = $scope.$watchCollection(key, valUpdater);
+					$scope['nglsLSWatcher$'+key] = function (event) {
+						if (event.key === storeName) {
+							$scope.$apply(function () {
+								getter.assign($scope, publicMethods.get(storeName));
+							});
+						}
+					};
 				} else {
 					$scope['nglsScopeWatcher$'+key] = $scope.$watch(key, valUpdater, true);
+					$scope['nglsLSWatcher$'+key] = function (event) {
+						if (event.key === storeName) {
+							$scope.$apply(function () {
+								var col = getter($scope);
+								var newCol = publicMethods.get(storeName);
+								newCol.splice(0, 0, 0, col.length);
+								Array.prototype.splice.apply(col, newCol);
+							});
+						}
+					};
 				}
 
-				$scope['nglsLSWatcher$'+key] = function (event) {
-					if (event.key === storeName) {
-						$scope.$apply(function () {
-							setter.assign($scope, publicMethods.get(storeName));
-						});
-					}
-				};
+
 				$window.addEventListener('storage', $scope['nglsLSWatcher$'+key]);
 
 				return publicMethods.get(storeName);
