@@ -163,7 +163,10 @@
 					$scope['nglsLSWatcher$'+key] = function (event) {
 						if (event.key === storeName) {
 							$scope.$apply(function () {
-								getter.assign($scope, publicMethods.get(storeName));
+								var col = getter($scope);
+								var newCol = publicMethods.get(storeName);
+								newCol.splice(0, 0, 0, col.length);
+								Array.prototype.splice.apply(col, newCol);
 							});
 						}
 					};
@@ -172,15 +175,11 @@
 					$scope['nglsLSWatcher$'+key] = function (event) {
 						if (event.key === storeName) {
 							$scope.$apply(function () {
-								var col = getter($scope);
-								var newCol = publicMethods.get(storeName);
-								newCol.splice(0, 0, 0, col.length);
-								Array.prototype.splice.apply(col, newCol);
+								getter.assign($scope, publicMethods.get(storeName));
 							});
 						}
 					};
 				}
-
 
 				$window.addEventListener('storage', $scope['nglsLSWatcher$'+key]);
 
