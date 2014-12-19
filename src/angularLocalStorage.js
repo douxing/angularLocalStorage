@@ -1,12 +1,12 @@
 /*
  * Angular.js localStorage module
- * https://github.com/agrublev/angularLocalStorage
+ * https://github.com/douxing/angularLocalStorage
  */
 
 (function (window, angular, undefined) {
 	'use strict';
 
-	angular.module('angularLocalStorage', ['ngCookies']).factory('storage', ['$parse', '$cookieStore', '$window', '$log', function ($parse, $cookieStore, $window, $log) {
+	angular.module('angularLocalStorage', ['ngCookies']).factory('megastorage', ['$parse', '$cookieStore', '$window', '$log', function ($parse, $cookieStore, $window, $log) {
 		/**
 		 * Global Vars
 		 */
