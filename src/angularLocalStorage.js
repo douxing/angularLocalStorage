@@ -6,7 +6,7 @@
 (function (window, angular, undefined) {
 	'use strict';
 
-	angular.module('angularLocalStorage', ['ngCookies']).factory('megastorage', ['$parse', '$cookieStore', '$window', '$log', function ($parse, $cookieStore, $window, $log) {
+	angular.module('angularUselessLocalStorage', ['ngCookies']).factory('uselessstorage', ['$parse', '$cookieStore', '$window', '$log', function ($parse, $cookieStore, $window, $log) {
 		/**
 		 * Global Vars
 		 */
